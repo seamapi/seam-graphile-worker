@@ -8,7 +8,7 @@ This is a wrapper for Seam's opinionated usage of Graphile Worker.
 to a database, run migrations, configure crontabs etc.
 
 1. Install via `npm add seam-graphile-worker`
-2. Run `seam-graphile worker init` to create a `start:worker` script, a `seam-graphile-worker.config.ts` file, and a `src/tasks` directory.
+2. Run `seam-graphile worker init` to create a `start:worker` script, a `seam-graphile-worker.config.ts` file, a `src/tasks` directory and a `src/worker` directory.
 3. To run your worker, run `npm run start:worker`
 
 ## Features
@@ -18,5 +18,67 @@ to a database, run migrations, configure crontabs etc.
 - See all your healthy workers by polling `seam_graphile_worker.worker_health`
 - Task index is linted to include all tasks with predictable names
 - Define your cron jobs in a simple typed file format
+- Automatically validate input payloads against zod schemas
+- Prevent business-logic errors from retrying automatically
 
-## Defining Crontabs
+## Defining A New Task
+
+Tasks
+
+```ts
+// e.g. src/tasks/my_task.ts
+import { withTaskSpec } from "worker/with-task-spec"
+
+export default withTaskSpec({
+  task_name: "my_task",
+})(async (payload, opts) => {
+  // ...
+})
+```
+
+## Customizing Worker Task Middleware
+
+To customize worker middleware, edit the `src/worker/with-task-spec.ts` file.
+
+```ts
+import {
+  withSentry,
+  withDatabasePool,
+  createWithTaskSpec,
+} from "seam-graphile-worker"
+
+export const withTaskSpec = createWithTaskSpec({
+  middlewares: [withSentry, withDatabasePool],
+})
+```
+
+### Defining New Task Middleware
+
+You can define new Task Middleware by creating files in `src/worker/middlewares/with-*.ts`
+
+```ts
+// e.g. src/worker/middlewares/with-workspace.ts
+import { TaskMiddleware } from "seam-graphile-worker"
+
+export const withWorkspace: TaskMiddleware<{
+  opts_output: {
+    workspace: { name: string; created_at: Date }
+  }
+  opts_dependencies: {
+    db: DatabaseConnection
+  }
+  payload_dependencies: {
+    workspace_id: number
+  }
+}> = (next) => async (payload, opts) => {
+  opts.workspace = await opts.db.one("SELECT * FROM workspace WHERE id = $1", [
+    payload.workspace_id,
+  ])
+
+  return next(payload, opts)
+}
+```
+
+## Defining Cron Jobs
+
+## Deploying to Fly
