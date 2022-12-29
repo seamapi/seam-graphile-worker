@@ -13,7 +13,14 @@ type Operation =
       content: string
     }
 
-export const init = async () => {
+interface Options {
+  fs: typeof fs
+  packageDir: string
+}
+
+export const init = async (
+  opts: Options = { fs, packageDir: process.cwd() }
+) => {
   const operations: Operation[] = [
     {
       op: "change-text-file",

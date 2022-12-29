@@ -1,12 +1,12 @@
 export default `
 
 import * as tasks from "./src/tasks"
-import * as crontab from "./src/worker/crontab"
+import * as crontabs from "./src/worker/crontabs"
 import { SeamGraphileWorkerConfig } from "seam-graphile-worker"
 
 export default {
   tasks,
-  crontab
+  crontabs
 } as const satisfies SeamGraphileWorkerConfig<typeof tasks>
 
 
