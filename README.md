@@ -15,6 +15,7 @@ to a database, run migrations, configure crontabs etc.
 
 ## Features
 
+- Automatically parse environment database connection params via [pg-connection-from-env](https://github.com/seamapi/pg-connection-from-env)
 - Workers log errors to Sentry
 - Workers have a health endpoint
 - See all your healthy workers by polling `seam_graphile_worker.worker_health`
