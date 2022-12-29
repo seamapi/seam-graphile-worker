@@ -8,7 +8,9 @@ This is a wrapper for Seam's opinionated usage of Graphile Worker.
 to a database, run migrations, configure crontabs etc.
 
 1. Install via `npm add seam-graphile-worker`
-2. Run `seam-graphile worker init` to create a `start:worker` script, a `seam-graphile-worker.config.ts` file, a `src/tasks` directory and a `src/worker` directory.
+2. Run `seam-graphile worker init` to create a `start:worker` script, a
+   `seam-graphile-worker.config.ts` file, and some other boilerplate files
+   in the `src/worker` directory and `src/tasks` directory.
 3. To run your worker, run `npm run start:worker`
 
 ## Features
@@ -16,6 +18,7 @@ to a database, run migrations, configure crontabs etc.
 - Workers log errors to Sentry
 - Workers have a health endpoint
 - See all your healthy workers by polling `seam_graphile_worker.worker_health`
+- Automatically restart jobs that were taken by an unhealthy worker
 - Task index is linted to include all tasks with predictable names
 - Define your cron jobs in a simple typed file format
 - Automatically validate input payloads against zod schemas
@@ -80,5 +83,23 @@ export const withWorkspace: TaskMiddleware<{
 ```
 
 ## Defining Cron Jobs
+
+To define cronjobs, edit `crontabs` property of `seam-graphile-worker.config.ts`
+
+```ts
+import * as tasks from "worker/tasks"
+
+export default {
+  tasks,
+  crontabs: [
+    {
+      task: "example_task",
+      frequency: "1h",
+      payload: { some_param: "some_value" }
+      options: { priority: 1 }
+    }
+  ]
+}
+```
 
 ## Deploying to Fly

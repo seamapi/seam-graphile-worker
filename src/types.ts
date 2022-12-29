@@ -23,3 +23,10 @@ export interface CrontabItem<Tasks extends TaskIndexModule> {
   payload?: Object | null | undefined
   options: TaskOptions
 }
+
+export interface SeamGraphileWorkerConfig<
+  Tasks extends TaskIndexModule = TaskIndexModule
+> {
+  tasks: Tasks
+  crontabs: readonly CrontabItem<Tasks>[]
+}
