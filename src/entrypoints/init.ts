@@ -1,5 +1,8 @@
 import fs from "fs"
 import path from "path"
+import * as templates from "../templates"
+import chalk from "chalk"
+import mkdirp from "mkdirp"
 
 type Operation =
   | {
@@ -14,13 +17,11 @@ type Operation =
     }
 
 interface Options {
-  fs: typeof fs
-  packageDir: string
+  packageRoot: string
 }
 
-export const init = async (
-  opts: Options = { fs, packageDir: process.cwd() }
-) => {
+export const init = async (opts: Options = { packageRoot: process.cwd() }) => {
+  let { packageRoot } = opts
   const operations: Operation[] = [
     {
       op: "change-text-file",
@@ -35,36 +36,35 @@ export const init = async (
     {
       op: "create-file",
       path: "seam-graphile-worker.config.ts",
-      content: (
-        await import("../templates/seam-graphile-worker.config.template")
-      ).default,
+      content: templates.config,
     },
     {
       op: "create-file",
       path: "src/worker/crontab.ts",
-      content: (await import("../templates/worker/crontab.template")).default,
+      content: templates.crontab,
     },
     {
       op: "create-file",
       path: "src/worker/with-task-spec.ts",
-      content: (await import("../templates/worker/with-task-spec.template"))
-        .default,
+      content: templates.with_task_spec,
     },
     {
       op: "create-file",
       path: "src/tasks/index.ts",
-      content: (await import("../templates/tasks/index.template")).default,
+      content: templates.task_index,
     },
     {
       op: "create-file",
       path: "src/tasks/example_task.ts",
-      content: (await import("../templates/tasks/example_task.template"))
-        .default,
+      content: templates.example_task,
     },
   ]
 
-  const packageRoot = process.cwd()
+  packageRoot ||= process.cwd()
 
+  console.log(
+    chalk.gray(`Bootstrapping seam-graphile-worker into ${packageRoot}`)
+  )
   // Execute operations
   for (const op of operations) {
     const filePath = path.join(packageRoot, op.path)
@@ -75,13 +75,16 @@ export const init = async (
           fs.writeFileSync(filePath, op.change(contents))
           break
         case "create-file":
+          await mkdirp(path.dirname(filePath))
           fs.writeFileSync(filePath, op.content)
           break
       }
     } catch (e: any) {
-      console.log(`Operation Failed: ${op.op} ${op.path}`)
-      console.log(e.toString())
-      console.log(e.stack)
+      console.log(
+        `${chalk.red(`Operation Failed: ${op.op} ${op.path}`)} ${chalk.gray(
+          e.toString().slice(0, 40)
+        )}...`
+      )
     }
   }
 }
