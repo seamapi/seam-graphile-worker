@@ -9,6 +9,7 @@
   "devDependencies": {
     "@types/mkdirp": "^1.0.2",
     "@types/mock-fs": "^4.13.1",
+    "ava-postgres": "^3.0.0",
     "mock-fs": "^5.2.0",
     "prettier": "^2.8.1"
   },

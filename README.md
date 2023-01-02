@@ -24,6 +24,7 @@ to a database, run migrations, configure crontabs etc.
 - Define your cron jobs in a simple typed file format
 - Automatically validate input payloads against zod schemas
 - Prevent business-logic errors from retrying automatically
+- Run jobs or crons in tests easily
 
 ## Defining A New Task
 
