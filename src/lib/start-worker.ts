@@ -18,8 +18,8 @@ interface StartWorkerParams {
   tasks: TaskIndexModule
   exit_if_dead?: boolean
   logger?: Logger
-  build_time: string | Date
-  git_commit_sha: string
+  build_time?: string | Date
+  git_commit_sha?: string
 }
 
 export const startWorker = async (opts: StartWorkerParams) => {

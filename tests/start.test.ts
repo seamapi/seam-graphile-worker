@@ -7,7 +7,9 @@ test("should start graphile worker", async (t) => {
 
   process.env.POSTGRES_URI = connectionString
 
-  await start()
+  await start({
+    configPath: "./tests/example-seam-graphile-worker.config.ts",
+  })
 
   // TODO check health endpoint
 })
