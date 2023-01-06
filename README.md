@@ -105,3 +105,18 @@ export default {
 ```
 
 ## Deploying to Fly
+
+## Technical Details
+
+`seam-graphile-worker` maintains two schemas:
+
+- `graphile_worker` - this is the graphile worker schema, this is not changed
+  so that we have the same schema structure as upstream graphile worker
+- `seam_graphile_worker` - this schema adds additional information to the
+  context for graphile_worker
+
+## Stuff seam-graphile-worker doesn't do that you should do
+
+- Introduce logging middleware that captures logs from your job, the payload,
+  and other information then inserts it to a log table or sends to a logging
+  platform.

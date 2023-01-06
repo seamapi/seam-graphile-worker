@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "test": "ava"
+    "test": "ava",
+    "db:create-migration": "cd src/db/migrations && cp ./migration.template.ts ./$(date \"+%s\")-replace-me.ts"
   },
   "devDependencies": {
     "@types/mkdirp": "^1.0.2",
@@ -24,6 +25,7 @@
     "esbuild-runner": "^2.2.2",
     "expect-type": "^0.15.0",
     "graphile-worker": "^0.13.0",
+    "kysely": "^0.23.3",
     "mkdirp": "^1.0.4",
     "ms": "^2.1.3",
     "pg": "^8.8.0",
