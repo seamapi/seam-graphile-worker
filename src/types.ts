@@ -1,4 +1,6 @@
-import { Job } from "graphile-worker"
+import type { Runner, Job } from "graphile-worker"
+import { Kysely } from "kysely"
+import { DatabaseSchema } from "lib/get-kysely-db"
 
 export interface TaskOptions {
   job_key?: string
@@ -29,4 +31,28 @@ export interface SeamGraphileWorkerConfig<
 > {
   tasks: Tasks
   crontabs: readonly CrontabItem<Tasks>[]
+}
+
+export interface Logger {
+  log: (...args: any[]) => void
+  debug: (...args: any[]) => void
+  info: (...args: any[]) => void
+  error: (...args: any[]) => void
+}
+
+export interface HealthServer {
+  stop: () => void
+}
+
+export interface WorkerState {
+  last_active_worker_event_at: number
+  dead: boolean
+}
+
+export interface WorkerContext {
+  logger: Logger
+  worker_state: WorkerState
+  db: Kysely<DatabaseSchema>
+  runner: Runner
+  health_server: HealthServer
 }
