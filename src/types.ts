@@ -1,6 +1,7 @@
 import type { Runner, Job } from "graphile-worker"
 import { Kysely } from "kysely"
 import { DatabaseSchema } from "lib/get-kysely-db"
+import { Pool } from "pg"
 
 export interface TaskOptions {
   job_key?: string
@@ -47,13 +48,14 @@ export interface HealthServer {
 export interface WorkerState {
   last_active_worker_event_at: number
   dead: boolean
-  graphile_worker_id?: string
+  gw_worker_id?: string
   build_time?: number
   git_commit_sha?: string
 }
 
 export interface WorkerContext {
   logger: Logger
+  pool: Pool
   worker_state: WorkerState
   db: Kysely<DatabaseSchema>
   runner: Runner
