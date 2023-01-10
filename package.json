@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "test": "ava",
+    "typecheck": "tsc --noEmit",
     "db:create-migration": "cd src/db/migrations && cp ./migration.template.ts ./$(date \"+%s\")-replace-me.ts"
   },
   "devDependencies": {

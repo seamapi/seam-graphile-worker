@@ -1,7 +1,7 @@
-import { ms } from "ms"
+import ms from "ms"
 import delay from "delay"
 import { Pool } from "pg"
-import { Logger } from "./start-worker"
+import { Logger } from "types"
 
 interface Opts {
   pool: Pool

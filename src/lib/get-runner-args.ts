@@ -13,7 +13,7 @@ export const getRunnerArgs = ({
 }: {
   pool: Pool
   tasks: TaskIndexModule
-  crontab_config: CrontabItem<any>[]
+  crontab_config: readonly CrontabItem<any>[]
   logger: Logger
 }): RunnerOptions => ({
   pgPool: pool,

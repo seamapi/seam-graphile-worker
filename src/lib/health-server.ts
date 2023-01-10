@@ -1,4 +1,4 @@
-import type { WorkerState } from "./start-worker"
+import type { WorkerState } from "types"
 import http from "http"
 
 interface Opts {

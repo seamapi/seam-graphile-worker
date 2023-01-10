@@ -1,6 +1,8 @@
 import { CrontabItem } from "types"
 
-export const generateGraphileWorkerCrontab = (items: CrontabItem<any>[]) => {
+export const generateGraphileWorkerCrontab = (
+  items: readonly CrontabItem<any>[]
+) => {
   return items
     .map(
       (item, i) =>
