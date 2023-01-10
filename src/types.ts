@@ -35,6 +35,7 @@ export interface CrontabItem<Tasks extends TaskIndexModule> {
 export interface SeamGraphileWorkerConfig<
   Tasks extends TaskIndexModule = TaskIndexModule
 > {
+  health_server_port: number
   tasks: Tasks
   crontabs: readonly CrontabItem<Tasks>[]
   build_time?: string | number

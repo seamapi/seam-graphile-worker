@@ -18,6 +18,10 @@ export const start = async (argv: Opts = {}) => {
   const connectionString = getConnectionStringFromEnv()
   const pool = new Pool({ connectionString })
 
+  if (!argv.healthServerPort) {
+    throw new Error("--health-server-port is required")
+  }
+
   // Check database connection
   try {
     await pool.query("SELECT 1")
@@ -51,7 +55,7 @@ export const start = async (argv: Opts = {}) => {
       argv.reportJobErrorsToSentry ??
       config.report_job_errors_to_sentry ??
       false,
-    health_server_port: argv.healthServerPort || 3051,
+    health_server_port: argv.healthServerPort,
     tasks: config.tasks,
     crontab_config: config.crontabs,
   })

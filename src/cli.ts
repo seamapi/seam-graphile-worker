@@ -8,9 +8,9 @@ yargs(hideBin(process.argv))
   .command(
     "init",
     "Bootstrap project with seam-graphile-worker config",
-    (yargs) => yargs,
+    (yargs) => yargs.option("package-root", { type: "string", default: "." }),
     async (argv) => {
-      await init()
+      await init(argv)
     }
   )
   .command(
@@ -18,13 +18,14 @@ yargs(hideBin(process.argv))
     "Start a Seam Graphile Worker",
     (yargs) => {
       return yargs
-        .option("health-port", {
-          default: "3410",
+        .option("health-server-port", {
+          type: "number",
+          default: 3410,
         })
         .option("migrate", { default: true })
     },
     async (argv) => {
-      await start()
+      await start(argv)
     }
   )
   .command(
@@ -32,6 +33,6 @@ yargs(hideBin(process.argv))
     "Migrate graphile_worker and seam_graphile_worker schema",
     (yargs) => yargs,
     async (argv) => {
-      await migrate()
+      await migrate(argv)
     }
   ).argv
