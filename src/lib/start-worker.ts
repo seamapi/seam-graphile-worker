@@ -1,5 +1,5 @@
 import { Pool } from "pg"
-import { TaskIndexModule, WorkerContext } from "types"
+import { CrontabItem, TaskIndexModule, WorkerContext } from "types"
 import { run, Runner } from "graphile-worker"
 import EventEmitter from "events"
 import { startHealthServer } from "./health-server"
@@ -10,14 +10,16 @@ import * as ev_handler from "./worker-event-handler"
 import { initSentry } from "./init-sentry"
 import ms from "ms"
 import { getDefaultLogger } from "./utils/get-default-logger"
+import { getRunnerArgs } from "./get-runner-args"
 
 interface StartWorkerParams {
   pool: Pool
   health_server_port: number
+  crontab_config?: readonly CrontabItem<any>[]
   tasks: TaskIndexModule
   exit_if_dead?: boolean
   logger?: Logger
-  build_time?: string | Date
+  build_time?: string | Date | number
   git_commit_sha?: string
   report_job_errors_to_sentry?: boolean
 }
@@ -68,12 +70,6 @@ export const startWorker = async (opts: StartWorkerParams) => {
   worker_events.on("worker:stop", handleUsing("onInactiveWorkerEvent"))
   worker_events.on("job:error", handleUsing("onJobError"))
 
-  const runner = await run({
-    ...getRunnerArgs({ pool }),
-    events: worker_events,
-  })
-  worker_context.runner = runner
-
   process.on("SIGINT", handleUsing("onSigint"))
 
   const check_alive_interval = setInterval(
@@ -91,6 +87,17 @@ export const startWorker = async (opts: StartWorkerParams) => {
       max_worker_run_time
     )
   }
+
+  const runner = await run({
+    ...getRunnerArgs({
+      pool,
+      crontab_config: opts.crontab_config ?? [],
+      tasks: opts.tasks,
+      logger,
+    }),
+    events: worker_events,
+  })
+  worker_context.runner = runner
 
   // // MONKEY-PATCH runner stop function to also stop server
   ;(runner as any).og_runner_stop = runner.stop

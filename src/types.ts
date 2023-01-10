@@ -32,6 +32,10 @@ export interface SeamGraphileWorkerConfig<
 > {
   tasks: Tasks
   crontabs: readonly CrontabItem<Tasks>[]
+  build_time?: string | number
+  git_commit_sha?: string
+  report_job_errors_to_sentry?: boolean
+  logger?: Logger
 }
 
 export interface Logger {
