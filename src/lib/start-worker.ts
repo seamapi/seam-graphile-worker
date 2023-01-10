@@ -1,15 +1,15 @@
 import { Pool } from "pg"
 import { TaskIndexModule, WorkerContext } from "types"
-import http from "http"
-import delay from "delay"
-import ms from "ms"
+import { run, Runner } from "graphile-worker"
 import EventEmitter from "events"
-import { Kysely, PostgresDialect } from "kysely"
 import { startHealthServer } from "./health-server"
 import { testDatabaseConnection } from "./test-database-connection"
 import { getKyselyDatabaseInstance } from "./get-kysely-db"
 import { WorkerState, Logger } from "../types"
-import * as workerEventHandlers from "./worker-event-handler"
+import * as ev_handler from "./worker-event-handler"
+import { initSentry } from "./init-sentry"
+import ms from "ms"
+import { getDefaultLogger } from "./utils/get-default-logger"
 
 interface StartWorkerParams {
   pool: Pool
@@ -19,17 +19,12 @@ interface StartWorkerParams {
   logger?: Logger
   build_time?: string | Date
   git_commit_sha?: string
+  report_job_errors_to_sentry?: boolean
 }
 
 export const startWorker = async (opts: StartWorkerParams) => {
-  if (!opts.logger) {
-    opts.logger = {
-      log: console.log,
-      debug: console.log,
-      info: console.log,
-      error: console.log,
-    }
-  }
+  if (opts.report_job_errors_to_sentry) initSentry()
+  if (!opts.logger) opts.logger = getDefaultLogger()
 
   const { logger, pool, exit_if_dead = false } = opts
 
@@ -56,127 +51,54 @@ export const startWorker = async (opts: StartWorkerParams) => {
     logger,
     runner: null as any, // populate as soon as runner starts
     worker_state,
+    config: {
+      report_job_errors_to_sentry: opts.report_job_errors_to_sentry ?? false,
+      exit_if_dead,
+    },
   }
 
-  // const onInactiveWorkerEvent = async () => {
-  //   worker_dead = true
-  //   await db
-  //     .update(
-  //       "devops.worker_heartbeat",
-  //       {
-  //         was_accepting_jobs: false,
-  //         last_heartbeat_at: new Date(),
-  //       },
-  //       { graphile_worker_id }
-  //     )
-  //     .run(pool!)
-  // }
+  const handleUsing = (handlerName: keyof typeof ev_handler) => (ev: any) =>
+    ev_handler[handlerName](ev, worker_context)
 
-  // const reportToSentry = ({
-  //   worker,
-  //   job,
-  //   error,
-  // }: WorkerEventMap["job:error"]) => {
-  //   reportError(error, {
-  //     extra: {
-  //       job,
-  //       job_admin_url: `https://connect.getseam.com/admin/view_job?id=${job.id}`,
-  //       worker_id: worker.workerId,
-  //     },
-  //   })
-  // }
-
-  const handleWith = (handler) => (ev) => handler(ev, worker_context)
-
-  worker_events.on("worker:create", (ev) =>
-    workerEventHandlers.onWorkerCreated(ev, worker_context)
-  )
-  worker_events.on("worker:getJob:empty", (ev) =>
-    workerEventHandlers.onActiveWorkerEvent(ev, worker_context)
-  )
-
-  worker_events.on("job:start", (ev) =>
-    workerEventHandlers.onJobStart(ev, worker_context)
-  )
-  worker_events.on("job:complete", (ev) =>
-    workerEventHandlers.onActiveWorkerEvent(ev, worker_context)
-  )
-
-  worker_events.on("worker:fatalError", onInactiveWorkerEvent)
-  worker_events.on("worker:stop", onInactiveWorkerEvent)
-  worker_events.on("job:error", reportToSentry)
+  worker_events.on("worker:create", handleUsing("onWorkerCreated"))
+  worker_events.on("worker:getJob:empty", handleUsing("onActiveWorkerEvent"))
+  worker_events.on("job:start", handleUsing("onJobStart"))
+  worker_events.on("job:complete", handleUsing("onActiveWorkerEvent"))
+  worker_events.on("worker:fatalError", handleUsing("onInactiveWorkerEvent"))
+  worker_events.on("worker:stop", handleUsing("onInactiveWorkerEvent"))
+  worker_events.on("job:error", handleUsing("onJobError"))
 
   const runner = await run({
-    ...getRunnerArgs({ pool, additionalTasks }),
+    ...getRunnerArgs({ pool }),
     events: worker_events,
   })
   worker_context.runner = runner
 
-  // process.on("SIGINT", async () => {
-  //   logger.info("SIGINT received, stopping worker...")
-  //   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  //   await runner.stop().catch((_error) => {})
-  //   logger.info("Worker stopped, telling database we're not accepting jobs...")
-  //   await db
-  //     .update(
-  //       "devops.worker_heartbeat",
-  //       { was_accepting_jobs: false, last_heartbeat_at: new Date() },
-  //       { graphile_worker_id }
-  //     )
-  //     .run(pool!)
-  //   process.exit(0)
-  // })
+  process.on("SIGINT", handleUsing("onSigint"))
 
-  // const check_alive_interval = setInterval(async () => {
-  //   await db
-  //     .update(
-  //       "devops.worker_heartbeat",
-  //       { last_heartbeat_at: new Date(), was_accepting_jobs: !worker_dead },
-  //       { graphile_worker_id }
-  //     )
-  //     .run(pool!)
+  const check_alive_interval = setInterval(
+    handleUsing("onHeartbeatInterval"),
+    10_000
+  )
 
-  //   if (Date.now() - last_active_worker_event_at > ms("5m")) {
-  //     worker_dead = true
-  //   }
-  //   // In production, kill the worker so it can automatically restart
-  //   if (exit_if_dead && worker_dead) {
-  //     // eslint-disable-next-line unicorn/no-process-exit
-  //     process.exit(1)
-  //   }
-  // }, 10_000)
-
-  // // Kill workers after MAX_WORKER_RUN_TIME, this can be done to prevent
-  // // KnexJSConnectionTimeout issues from bad pool cleanup
-  // if (process.env.MAX_WORKER_RUN_TIME) {
-  //   const max_worker_run_time = ms(process.env.MAX_WORKER_RUN_TIME)
-  //   const random_offset = (Math.random() - 0.5) * max_worker_run_time
-  //   if (max_worker_run_time) {
-  //     setTimeout(async () => {
-  //       console.log(
-  //         `Stopping worker because it's been running for longer than MAX_WORKER_RUN_TIME (${
-  //           process.env.MAX_WORKER_RUN_TIME
-  //         }) plus a random offset of ${(random_offset / 1000 / 60).toFixed(
-  //           2
-  //         )} min. Worker is given 5 minutes to shut down.`
-  //       )
-  //       await runner.stop()
-  //     }, max_worker_run_time)
-  //     setTimeout(() => {
-  //       console.log("Killing worker process...")
-  //       // eslint-disable-next-line unicorn/no-process-exit
-  //       process.exit(0)
-  //     }, max_worker_run_time + ms("5m"))
-  //   }
-  // }
+  // Kill workers after MAX_WORKER_RUN_TIME, this can be done to prevent
+  // KnexJSConnectionTimeout issues from bad pool cleanup
+  if (process.env.MAX_WORKER_RUN_TIME) {
+    const max_worker_run_time = ms(process.env.MAX_WORKER_RUN_TIME)
+    const random_offset = (Math.random() - 0.5) * max_worker_run_time
+    setTimeout(
+      () => ev_handler.onWorkerMaxRuntime({ random_offset }, worker_context),
+      max_worker_run_time
+    )
+  }
 
   // // MONKEY-PATCH runner stop function to also stop server
-  // ;(runner as any).og_runner_stop = runner.stop
-  // runner.stop = async () => {
-  //   health_server.stop()
-  //   clearInterval(check_alive_interval)
-  //   return (runner as any).og_runner_stop()
-  // }
+  ;(runner as any).og_runner_stop = runner.stop
+  runner.stop = async () => {
+    health_server.stop()
+    clearInterval(check_alive_interval)
+    return (runner as any).og_runner_stop()
+  }
 
-  // return runner
+  return runner
 }

@@ -38,6 +38,7 @@ export interface Logger {
   log: (...args: any[]) => void
   debug: (...args: any[]) => void
   info: (...args: any[]) => void
+  warn: (...args: any[]) => void
   error: (...args: any[]) => void
 }
 
@@ -60,4 +61,8 @@ export interface WorkerContext {
   db: Kysely<DatabaseSchema>
   runner: Runner
   health_server: HealthServer
+  config: {
+    report_job_errors_to_sentry: boolean
+    exit_if_dead: boolean
+  }
 }
