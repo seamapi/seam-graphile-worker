@@ -5,7 +5,7 @@ interface Opts {
   pretty?: boolean
 }
 
-export const getGraphileLogger = (logger: Logger, { pretty }: Opts) =>
+export const getGraphileLogger = (logger: Logger, { pretty }: Opts = {}) =>
   new GraphileLogger((scope) => {
     return (level, message, meta) => {
       const task_text = scope.taskIdentifier ? `: ${scope.taskIdentifier}` : ""
@@ -25,7 +25,7 @@ export const getGraphileLogger = (logger: Logger, { pretty }: Opts) =>
           logger.info(message)
           logger.debug(message, { ...scope, ...meta })
         } else {
-          const log_fn = logger[level] ?? logger.info
+          const log_fn = (logger as any)[level] ?? logger.info
           log_fn(message, {
             ...scope,
             ...meta,

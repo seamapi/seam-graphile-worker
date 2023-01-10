@@ -11,11 +11,12 @@ export const getRunnerArgs = ({
   crontab_config,
   logger,
 }: {
-  pool?: Pool
+  pool: Pool
   tasks: TaskIndexModule
   crontab_config: CrontabItem<any>[]
   logger: Logger
-} = {}): RunnerOptions => ({
+}): RunnerOptions => ({
+  pgPool: pool,
   // We parallelize workers by adding more containers, not by increasing the
   // number of graphile worker javascript routines
   // see https://github.com/seamapi/seam-connect/issues/540
@@ -23,8 +24,8 @@ export const getRunnerArgs = ({
 
   noHandleSignals: false,
   pollInterval: 1000,
-  taskList: { ...(tasks as any) },
+  taskList: { ...tasks },
   crontab: generateGraphileWorkerCrontab(crontab_config),
-  logger: getGraphileLogger(),
+  logger: getGraphileLogger(logger),
   noPreparedStatements: true,
 })
