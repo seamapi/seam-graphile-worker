@@ -14,6 +14,11 @@ export interface TaskOptions {
 
 export type TaskIndexModule = Record<string, (payload: any, opts: any) => any>
 
+export type TaskFn<Payload, Return> = (
+  payload: Payload,
+  helpers: any
+) => Promise<Return>
+
 export type AddTaskFn = <Tasks extends TaskIndexModule, T extends keyof Tasks>(
   task_name: T,
   payload: Parameters<Tasks[T]>[0],
