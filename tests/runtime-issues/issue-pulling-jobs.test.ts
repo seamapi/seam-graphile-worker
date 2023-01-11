@@ -1,3 +1,4 @@
+import getPort from "@ava/get-port"
 import test from "ava"
 import { start } from "entrypoints/start"
 import { getTestDatabase } from "../fixtures/get-test-database"
@@ -8,6 +9,7 @@ import { getDefaultLogger } from "lib/utils/get-default-logger"
 import { getKyselyDatabaseInstance } from "lib/get-kysely-db"
 
 test("database has issue while executing", async (t) => {
+  config.health_server_port = await getPort()
   let { connectionString, pool } = await getTestDatabase()
 
   process.env.POSTGRES_URI = connectionString

@@ -21,6 +21,7 @@ test("test satisfies contraint for a config", async (t) => {
         options: { priority: 1 },
       },
     ],
+    health_server_port: 3411,
   } as const satisfies SeamGraphileWorkerConfig<typeof tasks>
 
   t.truthy(expectTypeOf<SeamGraphileWorkerConfig<typeof tasks>>(example_config))

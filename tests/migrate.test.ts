@@ -7,5 +7,7 @@ test("should be able to migrate", async (t) => {
 
   process.env.POSTGRES_URI = connectionString
 
-  await migrate()
+  await migrate({})
+
+  t.pass()
 })

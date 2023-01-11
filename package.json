@@ -9,6 +9,7 @@
     "db:create-migration": "cd src/db/migrations && cp ./migration.template.ts ./$(date \"+%s\")-replace-me.ts"
   },
   "devDependencies": {
+    "@ava/get-port": "^2.0.0",
     "@types/mkdirp": "^1.0.2",
     "@types/mock-fs": "^4.13.1",
     "ava-postgres": "^3.0.0",
