@@ -2,7 +2,7 @@ import { Generated, Kysely, PostgresDialect } from "kysely"
 import { Pool } from "pg"
 
 export interface DatabaseSchema {
-  worker_heartbeat: {
+  "seam_graphile_worker.worker_heartbeat": {
     worker_heartbeat_id: Generated<string>
     gw_worker_id?: string
     version_build_time?: string | null

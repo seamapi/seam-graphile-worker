@@ -10,4 +10,5 @@ export default {
     },
   },
   logger: new LogEventEmitter(),
+  migrate_on_start: true,
 } satisfies SeamGraphileWorkerConfig<any>

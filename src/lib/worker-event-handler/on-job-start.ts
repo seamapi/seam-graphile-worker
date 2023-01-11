@@ -7,7 +7,7 @@ export const onJobStart = async ({}: any, ctx: WorkerContext) => {
   }
   await db
     .update(
-      "worker_heartbeat",
+      "seam_graphile_worker.worker_heartbeat",
       { last_heartbeat_at: new Date(), last_job_accepted_at: new Date() },
       { gw_worker_id: ctx.worker_state.gw_worker_id! }
     )

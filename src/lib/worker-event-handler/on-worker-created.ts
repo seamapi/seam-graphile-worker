@@ -7,7 +7,7 @@ export const onWorkerCreated = async ({ worker }: any, ctx: WorkerContext) => {
   const { build_time, git_commit_sha } = ctx.worker_state
   await db
     .upsert(
-      "worker_heartbeat",
+      "seam_graphile_worker.worker_heartbeat",
       {
         was_accepting_jobs: true,
         gw_worker_id: state.gw_worker_id as string,

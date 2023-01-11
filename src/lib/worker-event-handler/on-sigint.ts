@@ -9,7 +9,7 @@ export const onSigint = async ({}: any, ctx: WorkerContext) => {
   logger.info("Worker stopped, telling database we're not accepting jobs...")
   await db
     .update(
-      "worker_heartbeat",
+      "seam_graphile_worker.worker_heartbeat",
       { was_accepting_jobs: false, last_heartbeat_at: new Date() },
       { gw_worker_id: worker_state.gw_worker_id }
     )

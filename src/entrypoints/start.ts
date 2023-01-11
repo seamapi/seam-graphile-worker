@@ -18,19 +18,11 @@ export const start = async (argv: Opts = {}) => {
   const connectionString = getConnectionStringFromEnv()
   const pool = new Pool({ connectionString })
 
-  if (!argv.healthServerPort) {
-    throw new Error("--health-server-port is required")
-  }
-
   // Check database connection
   try {
     await pool.query("SELECT 1")
   } catch (err: any) {
     throw new UnableToConnectToDatabaseError()
-  }
-
-  if (argv.migrate ?? true) {
-    await migrate(connectionString)
   }
 
   require("esbuild-register")
@@ -45,6 +37,14 @@ export const start = async (argv: Opts = {}) => {
         ))
   ).default
 
+  if (!argv.healthServerPort && !config.health_server_port) {
+    throw new Error("--health-server-port is required")
+  }
+
+  if (config.migrate_on_start) {
+    await migrate(connectionString, config.logger)
+  }
+
   await startWorker({
     pool,
     build_time: config.build_time,
@@ -55,7 +55,7 @@ export const start = async (argv: Opts = {}) => {
       argv.reportJobErrorsToSentry ??
       config.report_job_errors_to_sentry ??
       false,
-    health_server_port: argv.healthServerPort,
+    health_server_port: argv.healthServerPort ?? config.health_server_port,
     tasks: config.tasks,
     crontab_config: config.crontabs,
   })

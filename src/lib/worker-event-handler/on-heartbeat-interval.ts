@@ -11,7 +11,7 @@ export const onHeartbeatInterval = async (_: any, ctx: WorkerContext) => {
 
   await db
     .update(
-      "worker_heartbeat",
+      "seam_graphile_worker.worker_heartbeat",
       {
         last_heartbeat_at: new Date(),
         was_accepting_jobs: !worker_state.dead,

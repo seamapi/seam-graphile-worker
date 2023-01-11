@@ -42,6 +42,7 @@ export interface SeamGraphileWorkerConfig<
   git_commit_sha?: string
   report_job_errors_to_sentry?: boolean
   logger?: Logger
+  migrate_on_start?: boolean
 }
 
 export interface Logger {

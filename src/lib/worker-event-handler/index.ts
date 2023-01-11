@@ -6,6 +6,7 @@ import { onSigint } from "./on-sigint"
 import { onWorkerCreated } from "./on-worker-created"
 import { onWorkerMaxRuntime } from "./on-worker-max-runtime"
 import { onJobStart } from "./on-job-start"
+import { onFailedToGetJob } from "./on-failed-to-get-job"
 
 export {
   onActiveWorkerEvent,
@@ -16,4 +17,5 @@ export {
   onJobError,
   onWorkerCreated,
   onHeartbeatInterval,
+  onFailedToGetJob,
 }

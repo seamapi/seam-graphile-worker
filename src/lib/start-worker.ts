@@ -1,6 +1,6 @@
 import { Pool } from "pg"
 import { CrontabItem, TaskIndexModule, WorkerContext } from "types"
-import { run, Runner } from "graphile-worker"
+import { run, Runner, WorkerEventMap, WorkerEvents } from "graphile-worker"
 import EventEmitter from "events"
 import { startHealthServer } from "./health-server"
 import { testDatabaseConnection } from "./test-database-connection"
@@ -59,21 +59,44 @@ export const startWorker = async (opts: StartWorkerParams) => {
     },
   }
 
-  const handleUsing = (handlerName: keyof typeof ev_handler) => (ev: any) =>
-    ev_handler[handlerName](ev, worker_context)
+  const handleWorkerEventWith = (
+    worker_event: keyof WorkerEventMap,
+    handlerName: keyof typeof ev_handler
+  ) => {
+    worker_events.on(worker_event, (ev: any) => {
+      logger.debug(`Handling worker event "${worker_event}"`)
+      return ev_handler[handlerName](ev, worker_context).catch((e) => {
+        logger.error(
+          `STOPPING RUNNER: Error handling worker event "${worker_event}" with "${handlerName}"`,
+          { error: e }
+        )
+        runner.stop().catch((e) => {
+          logger.error(`Error stopping runner: ${e.toString()}`)
+        })
+      })
+    })
+  }
+  const logUnhandledWorkerEvent = (worker_event: keyof WorkerEventMap) => {
+    worker_events.on(worker_event, (ev: any) => {
+      logger.debug(`Unhandled Worker Event "${worker_event}"`, ev)
+    })
+  }
 
-  worker_events.on("worker:create", handleUsing("onWorkerCreated"))
-  worker_events.on("worker:getJob:empty", handleUsing("onActiveWorkerEvent"))
-  worker_events.on("job:start", handleUsing("onJobStart"))
-  worker_events.on("job:complete", handleUsing("onActiveWorkerEvent"))
-  worker_events.on("worker:fatalError", handleUsing("onInactiveWorkerEvent"))
-  worker_events.on("worker:stop", handleUsing("onInactiveWorkerEvent"))
-  worker_events.on("job:error", handleUsing("onJobError"))
+  handleWorkerEventWith("worker:create", "onWorkerCreated")
+  handleWorkerEventWith("worker:getJob:empty", "onActiveWorkerEvent")
+  handleWorkerEventWith("job:start", "onJobStart")
+  handleWorkerEventWith("job:complete", "onActiveWorkerEvent")
+  handleWorkerEventWith("worker:fatalError", "onInactiveWorkerEvent")
+  handleWorkerEventWith("worker:stop", "onInactiveWorkerEvent")
+  handleWorkerEventWith("job:error", "onJobError")
+  handleWorkerEventWith("worker:getJob:error", "onFailedToGetJob")
 
-  process.on("SIGINT", handleUsing("onSigint"))
+  logUnhandledWorkerEvent("pool:listen:error")
+
+  process.on("SIGINT", (ev) => ev_handler.onSigint(ev, worker_context))
 
   const check_alive_interval = setInterval(
-    handleUsing("onHeartbeatInterval"),
+    () => ev_handler.onHeartbeatInterval({}, worker_context),
     10_000
   )
 
