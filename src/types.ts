@@ -77,3 +77,32 @@ export interface WorkerContext {
     exit_if_dead: boolean
   }
 }
+
+export type TaskMiddlewareDef<PayloadDeps, OptsDeps, OptsOutput> = {
+  opts_deps?: OptsDeps
+  opts_output?: OptsOutput
+  payload_deps?: PayloadDeps
+}
+
+export type TaskMiddleware<T extends TaskMiddlewareDef<any, any, any>> = (
+  next: (
+    payload: T["payload_deps"],
+    opts: T["opts_deps"] & T["opts_output"]
+  ) => any
+) => (
+  payload: T["payload_deps"],
+  opts: T["opts_deps"] & T["opts_output"]
+) => any
+
+export type TaskMiddlewareChainOptsOutput<
+  MWChain extends readonly TaskMiddleware<any>[]
+> = MWChain extends readonly []
+  ? {}
+  : MWChain extends readonly [infer First, ...infer Rest]
+  ? First extends TaskMiddleware<infer T>
+    ? T["opts_output"] &
+        (Rest extends readonly TaskMiddleware<any>[]
+          ? TaskMiddlewareChainOptsOutput<Rest>
+          : never)
+    : never
+  : never

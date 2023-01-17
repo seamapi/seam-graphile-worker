@@ -7,7 +7,7 @@ import {
 } from "seam-graphile-worker"
 
 export const withTaskSpec = createWithTaskSpec({
-  middlewares: [withSentry, withDatabasePool],
+  global_middlewares: [withSentry, withDatabasePool],
 })
 
 `.trim()
