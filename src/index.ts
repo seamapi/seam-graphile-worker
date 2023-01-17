@@ -1,1 +1,5 @@
 export * from "./types"
+export * from "./lib/start-worker"
+export * from "./lib/queue-job"
+export * from "./lib/migrate"
+export * from "./lib/log-event-emitter"
