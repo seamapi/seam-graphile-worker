@@ -11,12 +11,11 @@ interface TaskSpec {
 type WithTaskSpecFn<
   GlobalSpec extends CreateWithTaskSpecParams,
   TS extends TaskSpec
-> = (
-  task_spec: TS
-) => (
+> = (task_spec: TS) => (
   payload: any,
-  opts: TaskMiddlewareChainOptsOutput<GlobalSpec["global_middlewares"]> &
-    TaskMiddlewareChainOptsOutput<TS["middlewares"]>
+  opts: any
+  // opts: TaskMiddlewareChainOptsOutput<GlobalSpec["global_middlewares"]> &
+  //   TaskMiddlewareChainOptsOutput<TS["middlewares"]>
 ) => any
 
 export type CreateWithTaskSpecFunction = <

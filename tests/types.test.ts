@@ -77,10 +77,10 @@ test("test middleware definition typecheck", async (t) => {
     global_middlewares: [withWorkspace, withPool],
   })
 
+  const withTask = withTaskSpec({ middlewares: [withPool] })
+
   const { payload, opts } = await new Promise<any>((resolve, reject) => {
-    const taskFn = withTaskSpec({
-      middlewares: [],
-    })((payload, opts) => {
+    const taskFn = withTask((payload, opts) => {
       resolve({ payload, opts })
     })
 
