@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { init } from "entrypoints/init"
 import migrate from "entrypoints/migrate"
 import { start } from "entrypoints/start"
