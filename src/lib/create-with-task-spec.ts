@@ -8,14 +8,14 @@ interface TaskSpec {
   middlewares: readonly TaskMiddleware<any>[]
 }
 
-type WithTaskSpecFn<
+export type WithTaskSpecFn<
   GlobalSpec extends CreateWithTaskSpecParams,
   TS extends TaskSpec
-> = (task_spec: TS) => (
+> = (
   payload: any,
-  opts: any
-  // opts: TaskMiddlewareChainOptsOutput<GlobalSpec["global_middlewares"]> &
-  //   TaskMiddlewareChainOptsOutput<TS["middlewares"]>
+  // opts: any
+  opts: TaskMiddlewareChainOptsOutput<GlobalSpec["global_middlewares"]> &
+    TaskMiddlewareChainOptsOutput<TS["middlewares"]>
 ) => any
 
 export type CreateWithTaskSpecFunction = <

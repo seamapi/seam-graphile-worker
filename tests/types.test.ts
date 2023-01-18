@@ -1,6 +1,6 @@
 import test from "ava"
 import { expectTypeOf } from "expect-type"
-import { createWithTaskSpec } from "lib/create-with-task-spec"
+import { createWithTaskSpec, WithTaskSpecFn } from "lib/create-with-task-spec"
 import {
   SeamGraphileWorkerConfig,
   TaskMiddleware,
@@ -75,12 +75,16 @@ test("test middleware definition typecheck", async (t) => {
 
   const withTaskSpec = createWithTaskSpec({
     global_middlewares: [withWorkspace, withPool],
-  })
+  } as const)
 
-  const withTask = withTaskSpec({ middlewares: [withPool] })
+  const withTask = withTaskSpec({ middlewares: [withPool] } as const)
 
-  const { payload, opts } = await new Promise<any>((resolve, reject) => {
+  await new Promise((resolve, reject) => {
     const taskFn = withTask((payload, opts) => {
+      expectTypeOf<typeof opts>().toEqualTypeOf<{
+        pool: "somepool"
+        workspace: { name: string; created_at: Date }
+      }>()
       resolve({ payload, opts })
     })
 
