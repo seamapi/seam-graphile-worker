@@ -14,7 +14,7 @@ import { getRunnerArgs } from "./get-runner-args"
 
 interface StartWorkerParams {
   pool: Pool
-  health_server_port: number
+  health_server_port: number | string
   crontab_config?: readonly CrontabItem<any>[]
   tasks: TaskIndexModule
   exit_if_dead?: boolean
@@ -37,9 +37,12 @@ export const startWorker = async (opts: StartWorkerParams) => {
     dead: false,
   }
 
+  if (!opts.health_server_port)
+    throw new Error(`Invalid health_server_port: ${opts.health_server_port}`)
+
   const health_server = startHealthServer({
     worker_state,
-    port: opts.health_server_port,
+    port: Number(opts.health_server_port),
   })
 
   await testDatabaseConnection({ pool, logger, exit_if_dead })

@@ -40,8 +40,8 @@ export const init = async (opts: Options = { packageRoot: process.cwd() }) => {
     },
     {
       op: "create-file",
-      path: "src/worker/crontab.ts",
-      content: templates.crontab,
+      path: "src/worker/crontabs.ts",
+      content: templates.crontabs,
     },
     {
       op: "create-file",
@@ -68,6 +68,7 @@ export const init = async (opts: Options = { packageRoot: process.cwd() }) => {
   // Execute operations
   for (const op of operations) {
     const filePath = path.join(packageRoot, op.path)
+    console.log(chalk.gray(`${op.op}: ${op.path}`))
     try {
       switch (op.op) {
         case "change-text-file":
