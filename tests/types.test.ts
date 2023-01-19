@@ -77,11 +77,15 @@ test("test middleware definition typecheck", async (t) => {
     global_middlewares: [withWorkspace, withPool],
   } as const)
 
-  const withTask = withTaskSpec({ middlewares: [withPool] } as const)
+  const withTask = withTaskSpec({
+    name: "example",
+    middlewares: [withPool],
+  } as const)
 
   await new Promise((resolve, reject) => {
     const taskFn = withTask((payload, opts) => {
       expectTypeOf<typeof opts>().toEqualTypeOf<{
+        task_name: string
         pool: "somepool"
         workspace: { name: string; created_at: Date }
       }>()

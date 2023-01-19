@@ -1,7 +1,7 @@
 export default `
 
 import * as tasks from "./src/tasks"
-import * as crontabs from "./src/worker/crontabs"
+import crontabs from "./src/worker/crontabs"
 import { SeamGraphileWorkerConfig, getDefaultLogger } from "seam-graphile-worker"
 
 export default {

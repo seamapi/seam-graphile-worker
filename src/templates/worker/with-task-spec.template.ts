@@ -8,6 +8,6 @@ import {
 
 export const withTaskSpec = createWithTaskSpec({
   global_middlewares: [withSentry, withDatabasePool],
-})
+} as const)
 
 `.trim()

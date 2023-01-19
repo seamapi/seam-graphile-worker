@@ -1,14 +1,15 @@
 export default `
 import { type CrontabItem } from "seam-graphile-worker"
-import config from "../../seam-graphile-worker.config"
+import * as tasks from "../tasks"
 
-export default [
+export const crontabs = [
   {
     task: "example_task",
     frequency: "0 0 * * *",
     payload: { some_param: "some_value" },
     options: { priority: 1 },
   },
-] satisfies CrontabItem<typeof config["tasks"]>[]
+] satisfies CrontabItem<typeof tasks>[]
 
+export default crontabs
 `.trim()

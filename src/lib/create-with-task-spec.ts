@@ -5,6 +5,7 @@ interface CreateWithTaskSpecParams {
 }
 
 interface TaskSpec {
+  name: string
   middlewares: readonly TaskMiddleware<any>[]
 }
 
@@ -13,9 +14,8 @@ export type WithTaskSpecFn<
   TS extends TaskSpec
 > = (
   payload: any,
-  // opts: any
   opts: TaskMiddlewareChainOptsOutput<GlobalSpec["global_middlewares"]> &
-    TaskMiddlewareChainOptsOutput<TS["middlewares"]>
+    TaskMiddlewareChainOptsOutput<TS["middlewares"]> & { task_name: string }
 ) => any
 
 export type CreateWithTaskSpecFunction = <
@@ -26,12 +26,20 @@ export type CreateWithTaskSpecFunction = <
   route_spec: TS
 ) => (next: WithTaskSpecFn<GlobalSpec, TS>) => any
 
+export const createWithName =
+  (name: string) => (next: any) => (payload: any, opts: any) => {
+    opts.task_name = name
+    return next(payload, opts)
+  }
+
 export const createWithTaskSpec = (({
   global_middlewares,
 }: CreateWithTaskSpecParams) => {
   return (task_spec: TaskSpec) => {
     return (next: (payload: any, opts: any) => any) => {
-      const all_middlewares = global_middlewares.concat(task_spec.middlewares)
+      const all_middlewares = [createWithName(task_spec.name)].concat(
+        global_middlewares.concat(task_spec.middlewares)
+      )
       all_middlewares.reverse()
       for (const mw of all_middlewares) {
         next = mw(next)

@@ -1,13 +1,10 @@
 export default `
 
-import {
-  withSentry,
-  withDatabasePool,
-  createWithTaskSpec,
-} from "seam-graphile-worker"
+import withTaskSpec from "../worker/with-task-spec"
 
-export const withTaskSpec = createWithTaskSpec({
-  middlewares: [withSentry, withDatabasePool],
-})
+export const example_task = createWithTaskSpec({
+  task_name: "example_task",
+  middlewares: [],
+} as const)
 
 `
