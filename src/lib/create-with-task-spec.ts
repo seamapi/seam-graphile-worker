@@ -5,7 +5,7 @@ interface CreateWithTaskSpecParams {
 }
 
 interface TaskSpec {
-  name: string
+  task_name: string
   middlewares: readonly TaskMiddleware<any>[]
 }
 
@@ -37,7 +37,7 @@ export const createWithTaskSpec = (({
 }: CreateWithTaskSpecParams) => {
   return (task_spec: TaskSpec) => {
     return (next: (payload: any, opts: any) => any) => {
-      const all_middlewares = [createWithName(task_spec.name)].concat(
+      const all_middlewares = [createWithName(task_spec.task_name)].concat(
         global_middlewares.concat(task_spec.middlewares)
       )
       all_middlewares.reverse()

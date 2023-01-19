@@ -78,7 +78,7 @@ test("test middleware definition typecheck", async (t) => {
   } as const)
 
   const withTask = withTaskSpec({
-    name: "example",
+    task_name: "example",
     middlewares: [withPool],
   } as const)
 
