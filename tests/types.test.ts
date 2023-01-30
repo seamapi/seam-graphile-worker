@@ -6,6 +6,7 @@ import {
   TaskMiddleware,
   TaskMiddlewareChainOptsOutput,
 } from "types"
+import { z } from "zod"
 
 test("test satisfies constraint for a config", async (t) => {
   const example_task = (payload: any, opts: any) => {
@@ -80,6 +81,9 @@ test("test middleware definition typecheck", async (t) => {
   const withTask = withTaskSpec({
     task_name: "example",
     middlewares: [withPool],
+    payload: z.object({
+      my_param: z.string(),
+    }),
   } as const)
 
   await new Promise((resolve, reject) => {
@@ -89,6 +93,7 @@ test("test middleware definition typecheck", async (t) => {
         pool: "somepool"
         workspace: { name: string; created_at: Date }
       }>()
+      expectTypeOf<typeof payload>().toEqualTypeOf<{ my_param: string }>()
       resolve({ payload, opts })
     })
 

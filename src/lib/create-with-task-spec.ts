@@ -1,4 +1,5 @@
 import { TaskMiddleware, TaskMiddlewareChainOptsOutput } from "types"
+import { z } from "zod"
 
 interface CreateWithTaskSpecParams {
   global_middlewares: readonly TaskMiddleware<any>[]
@@ -7,13 +8,14 @@ interface CreateWithTaskSpecParams {
 interface TaskSpec {
   task_name: string
   middlewares: readonly TaskMiddleware<any>[]
+  payload: z.AnyZodObject
 }
 
 export type WithTaskSpecFn<
   GlobalSpec extends CreateWithTaskSpecParams,
   TS extends TaskSpec
 > = (
-  payload: any,
+  payload: z.infer<TS["payload"]>,
   opts: TaskMiddlewareChainOptsOutput<GlobalSpec["global_middlewares"]> &
     TaskMiddlewareChainOptsOutput<TS["middlewares"]> & { task_name: string }
 ) => any
