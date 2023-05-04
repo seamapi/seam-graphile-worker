@@ -30,7 +30,7 @@
     "esbuild-register": "^3.4.2",
     "esbuild-runner": "^2.2.2",
     "expect-type": "^0.15.0",
-    "graphile-worker": "^0.13.0",
+    "graphile-worker": "^0.14.0-rc.0",
     "kysely": "^0.23.3",
     "mkdirp": "^1.0.4",
     "ms": "^2.1.3",

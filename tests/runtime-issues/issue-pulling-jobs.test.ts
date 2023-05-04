@@ -36,7 +36,7 @@ test("database has issue while executing", async (t) => {
   t.truthy(
     logged_lines.some((line) =>
       line.includes(
-        `Failed to get job: error: schema "graphile_worker" does not exist`
+        `Failed to get job: error: relation "graphile_worker.jobs" does not exist`
       )
     )
   )
