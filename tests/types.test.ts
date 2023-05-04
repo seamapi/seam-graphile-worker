@@ -75,7 +75,7 @@ test("test middleware definition typecheck", async (t) => {
   )
 
   const withTaskSpec = createWithTaskSpec({
-    global_middlewares: [withWorkspace, withPool],
+    global_middlewares: [withPool, withWorkspace],
   } as const)
 
   const withTask = withTaskSpec({

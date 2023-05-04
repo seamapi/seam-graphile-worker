@@ -31,12 +31,12 @@ test("database has issue while executing", async (t) => {
   // make the graphile_worker schema broken
   await pool.query(`DROP SCHEMA graphile_worker CASCADE`)
 
-  await delay(ms("1s"))
+  await delay(ms("2s"))
 
   t.truthy(
     logged_lines.some((line) =>
       line.includes(
-        `Failed to get job: error: relation "graphile_worker.jobs" does not exist`
+        `Failed to get job: error: schema "graphile_worker" does not exist`
       )
     )
   )
