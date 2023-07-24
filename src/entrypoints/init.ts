@@ -58,6 +58,11 @@ export const init = async (opts: Options = { packageRoot: process.cwd() }) => {
       path: "src/tasks/example_task.ts",
       content: templates.example_task,
     },
+    {
+      op: "create-file",
+      path: "src/tasks/add_job_task.ts",
+      content: templates.add_job_task
+    }
   ]
 
   packageRoot ||= process.cwd()

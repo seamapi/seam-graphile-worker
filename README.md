@@ -8,7 +8,7 @@ This is a wrapper for Seam's opinionated usage of Graphile Worker.
 to a database, run migrations, configure crontabs etc.
 
 1. Install via `npm add seam-graphile-worker`
-2. Run `seam-graphile worker init` to create a `start:worker` script, a
+2. Run `seam-graphile-worker init` to create a `start:worker` script, a
    `seam-graphile-worker.config.ts` file, and some other boilerplate files
    in the `src/worker` directory and `src/tasks` directory.
 3. To run your worker, run `npm run start:worker`
