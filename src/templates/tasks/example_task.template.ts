@@ -1,5 +1,6 @@
 export default `
 
+import { z } from "zod"
 import { withTaskSpec } from "../worker/with-task-spec"
 
 export const example_task = withTaskSpec({
