@@ -43,6 +43,7 @@ export const startWorker = async (opts: StartWorkerParams) => {
   const health_server = startHealthServer({
     worker_state,
     port: Number(opts.health_server_port),
+    logger
   })
 
   await testDatabaseConnection({ pool, logger, exit_if_dead })
