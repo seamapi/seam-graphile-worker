@@ -20,7 +20,7 @@
     "prettier": "^2.8.1"
   },
   "dependencies": {
-    "@sentry/node": "^7.29.0",
+    "@sentry/node": "^7.119.2",
     "@types/node": "^18.11.18",
     "@types/yargs": "^17.0.17",
     "ava": "^5.1.0",
